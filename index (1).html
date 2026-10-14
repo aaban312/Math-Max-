@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Math Max - تمرین محاسبات ذهنی با آزمون‌های شخصی‌سازی شده">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧮</text></svg>">
+  <title>Math Max</title>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #1e293b;
+      --bg-input: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --key-bg: #1e40af;
+      --key-text: #ffffff;
+      --border: #334155;
+      --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      --font-size-base: 16px;
+      --font-size-question: 2.8rem;
+      --radius: 16px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.3);
+      --long-press-ms: 300;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font-main);
+      font-size: var(--font-size-base);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========== Screens ========== */
+    .screen {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+    }
+    .screen.active {
+      display: flex;
+    }
+
+    /* ========== Header ========== */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      min-height: 56px;
+    }
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .header-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.4rem;
+      padding: 8px;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header-btn:active {
+      background: var(--bg-input);
+    }
+
+    /* ========== Main Content ========== */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* ========== Bottom Nav ========== */
+    .bottom-nav {
+      display: flex;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 4px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+      cursor: pointer;
+      gap: 4px;
+    }
+    .nav-item.active {
+      color: var(--accent);
+    }
+    .nav-item span.icon {
+      font-size: 1.4rem;
+    }
+
+    /* ========== Cards & Lists ========== */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s;
+      background: var(--accent);
+      color: white;
+    }
+    .btn:active {
+      transform: scale(0.97);
+    }
+    .btn-block {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.1rem;
+    }
+    .btn-secondary {
+      background: var(--bg-input);
+      color: var(--text-primary);
+    }
+    .btn-success {
+      background: var(--success);
+    }
+    .btn-danger {
+      background: var(--danger);
+    }
+    .btn-warning {
+      background: var(--warning);
+      color: #000;
+    }
+    .btn-sm {
+      padding: 8px 14px;
+      font-size: 0.85rem;
+    }
+
+    /* ========== Home ========== */
+    .hero {
+      text-align: center;
+      padding: 24px 0;
+    }
+    .hero h2 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+    .hero p {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      flex: 1;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .record-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .record-item:last-child {
+      border-bottom: none;
+    }
+    .record-score {
+      font-weight: 700;
+      color: var(--success);
+    }
+
+    /* ========== Forms ========== */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    .form-control {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .form-control:focus {
+      border-color: var(--accent);
+    }
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    /* ========== Data List ========== */
+    .data-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+    }
+    .data-item .q {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .data-item .a {
+      color: var(--accent);
+      font-size: 0.95rem;
+    }
+    .data-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .icon-btn {
+      background: var(--bg-input);
+      border: none;
+      color: var(--text-primary);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-btn.danger {
+      color: var(--danger);
+    }
+
+    /* ========== Quiz Select ========== */
+    .quiz-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .quiz-card:active, .quiz-card.selected {
+      border-color: var(--accent);
+    }
+    .quiz-card h3 {
+      margin-bottom: 4px;
+    }
+    .quiz-card .meta {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* ========== Quiz Screen (like Math Workout) ========== */
+    #screen-quiz {
+      background: var(--bg-primary);
+    }
+    .quiz-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+    }
+    .quiz-progress {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+    .quiz-timer {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--bg-input);
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+    .quiz-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .question-display {
+      font-size: var(--font-size-question);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+      min-height: 1.2em;
+      direction: ltr;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .answer-line {
+      width: 60%;
+      max-width: 280px;
+      height: 3px;
+      background: var(--accent);
+      margin-bottom: 20px;
+      border-radius: 2px;
+    }
+    .answer-preview {
+      font-size: 1.8rem;
+      min-height: 2.2rem;
+      color: var(--text-primary);
+      direction: ltr;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .answer-preview.wrong {
+      color: var(--danger);
+      animation: shake 0.3s;
+    }
+    .answer-preview.correct {
+      color: var(--success);
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+    .quiz-feedback {
+      margin-top: 12px;
+      min-height: 40px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    /* ========== Keyboard ========== */
+    .keyboard {
+      background: var(--bg-secondary);
+      padding: 12px 10px calc(12px + env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .key {
+      position: relative;
+      background: var(--key-bg);
+      color: var(--key-text);
+      border: none;
+      border-radius: 14px;
+      font-size: 1.6rem;
+      font-weight: 600;
+      height: 64px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.1s, transform 0.05s;
+      -webkit-user-select: none;
+    }
+    .key:active, .key.pressed {
+      background: var(--accent-hover);
+      transform: scale(0.96);
+    }
+    .key .alt {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      font-size: 0.7rem;
+      opacity: 0.7;
+      font-weight: 500;
+    }
+    .key.wide {
+      grid-column: span 1;
+    }
+    .key.backspace {
+      background: #475569;
+    }
+    .key.enter {
+      background: var(--success);
+      font-size: 1.2rem;
+    }
+    .key.zero {
+      /* stays normal */
+    }
+
+    /* ========== Modal ========== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal {
+      background: var(--bg-secondary);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 400px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      border: 1px solid var(--border);
+    }
+    .modal h2 {
+      margin-bottom: 16px;
+      font-size: 1.3rem;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .modal-actions .btn {
+      flex: 1;
+    }
+
+    /* ========== Settings ========== */
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+    .setting-label {
+      font-size: 0.95rem;
+    }
+    .setting-control input[type="range"] {
+      width: 120px;
+      accent-color: var(--accent);
+    }
+    .setting-control select, .setting-control input[type="color"] {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-radius: 8px;
+      padding: 6px 10px;
+    }
+    .color-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .color-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+    .color-item input {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* ========== Results ========== */
+    .result-score {
+      font-size: 3rem;
+      font-weight: 800;
+      text-align: center;
+      color: var(--success);
+      margin: 16px 0;
+    }
+    .result-meta {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+    .wrong-list {
+      margin-top: 16px;
+    }
+    .wrong-item {
+      background: var(--bg-input);
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .wrong-item .q {
+      font-weight: 600;
+    }
+    .wrong-item .tag {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: var(--danger);
+      color: white;
+    }
+    .wrong-item .tag.skip {
+      background: var(--warning);
+      color: #000;
+    }
+
+    /* ========== Empty State ========== */
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+    }
+    .empty .icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    /* ========== Checkbox List ========== */
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg-card);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+    }
+    .check-item input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--accent);
+    }
+    .check-item .info {
+      flex: 1;
+    }
+
+    /* ========== Toast ========== */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      padding: 12px 24px;
+      border-radius: 12px;
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.3s;
+      border: 1px solid var(--border);
+      max-width: 90%;
+      text-align: center;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ========== Blind Mode Overlay ========== */
+    .blind-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--text-secondary);
+      z-index: 10;
+    }
+
+    /* Utility */
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-2 { margin-top: 12px; }
+    .mb-2 { margin-bottom: 12px; }
+    .flex-gap { display: flex; gap: 10px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <!-- ========== HOME ========== -->
+  <div id="screen-home" class="screen active">
+    <div class="header">
+      <h1>🧮 Math Max</h1>
+      <button class="header-btn" onclick="showScreen('settings')" title="تنظیمات">⚙️</button>
+    </div>
+    <div class="content">
+      <div class="hero">
+        <h2>تمرین محاسبات ذهنی</h2>
+        <p>آزمون‌های شخصی‌سازی‌شده با رکوردگیری</p>
+        <button class="btn btn-block" onclick="openQuizSelector()">شروع آزمون</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-best">—</div>
+          <div class="stat-label">بهترین امتیاز</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-count">0</div>
+          <div class="stat-label">تعداد آزمون</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">آخرین رکوردها</div>
+        <div id="home-records"></div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-item active" onclick="showScreen('home')">
+        <span class="icon">🏠</span>
+        خانه
+      </button>
+      <button class="nav-item" onclick="showScreen('data')">
+        <span class="icon">📚</span>
+        داده‌ها
+      </button>
+      <button class="nav-item" onclick="showScreen('quizzes')">
+        <span class="icon">📝</span>
+        آزمون‌ها
+      </button>
+      <button class="nav-item" onclick="showScreen('records')">
+        <span class="icon">🏆</span>
+        رکوردها
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== DATA ========== -->
+  <div id="screen-data" class="screen">
+    <div class="header">
+      <button class="header-btn" onclick="showScreen('home')">←</button>
+      <h1>مدیریت داده‌ها</h1>
+      <button class="header-btn" onclick="openAddData()">＋</button>
+    </div>
+    <div class="content">
+      <div class="flex-gap mb-2">
+        <input type="text" class="form-control" id="data-search" placeholder="جستجو..." oninput="renderDataList()" style="flex:1">
+      </div>
+      <div id="data-list"></div>
+      <div id="data-empty" class="empty hidden">
+        <div class="icon">📭</div>
+        <p>هنوز داده‌ای اضافه نکردی</p>
+        <button class="btn mt-2" onclick="openAddData()">افزودن اولین داده</button>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-item" onclick="showScreen('home')"><span class="icon">🏠</span>خانه</button>
+      <button class="nav-item active" onclick="showScreen('data')"><span class="icon">📚</span>داده‌ها</button>
+      <button class="nav-item" onclick="showScreen('quizzes')"><span class="icon">📝</span>آزمون‌ها</button>
+      <button class="nav-item" onclick="showScreen('records')"><span class="icon">🏆</span>رکوردها</button>
+    </div>
+  </div>
+
+  <!-- ========== QUIZZES ========== -->
+  <div id="screen-quizzes" class="screen">
+    <div class="header">
+      <button class="header-btn" onclick="showScreen('home')">←</button>
+      <h1>آزمون‌ها</h1>
+      <button class="header-btn" onclick="openCreateQuiz()">＋</button>
+    </div>
+    <div class="content">
+      <div id="quiz-list"></div>
+      <div id="quiz-empty" class="empty hidden">
+        <div class="icon">📝</div>
+        <p>هنوز آزمونی نساختی</p>
+        <button class="btn mt-2" onclick="openCreateQuiz()">ساخت اولین آزمون</button>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-item" onclick="showScreen('home')"><span class="icon">🏠</span>خانه</button>
+      <button class="nav-item" onclick="showScreen('data')"><span class="icon">📚</span>داده‌ها</button>
+      <button class="nav-item active" onclick="showScreen('quizzes')"><span class="icon">📝</span>آزمون‌ها</button>
+      <button class="nav-item" onclick="showScreen('records')"><span class="icon">🏆</span>رکوردها</button>
+    </div>
+  </div>
+
+  <!-- ========== RECORDS ========== -->
+  <div id="screen-records" class="screen">
+    <div class="header">
+      <button class="header-btn" onclick="showScreen('home')">←</button>
+      <h1>رکوردها</h1>
+      <button class="header-btn" onclick="if(confirm('همه رکوردها پاک شوند؟')){store.records=[];saveStore();renderRecords();renderHome();}">🗑️</button>
+    </div>
+    <div class="content">
+      <div id="records-list"></div>
+      <div id="records-empty" class="empty hidden">
+        <div class="icon">🏆</div>
+        <p>هنوز رکوردی ثبت نشده</p>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-item" onclick="showScreen('home')"><span class="icon">🏠</span>خانه</button>
+      <button class="nav-item" onclick="showScreen('data')"><span class="icon">📚</span>داده‌ها</button>
+      <button class="nav-item" onclick="showScreen('quizzes')"><span class="icon">📝</span>آزمون‌ها</button>
+      <button class="nav-item active" onclick="showScreen('records')"><span class="icon">🏆</span>رکوردها</button>
+    </div>
+  </div>
+
+  <!-- ========== SETTINGS ========== -->
+  <div id="screen-settings" class="screen">
+    <div class="header">
+      <button class="header-btn" onclick="showScreen('home')">←</button>
+      <h1>تنظیمات</h1>
+      <div style="width:40px"></div>
+    </div>
+    <div class="content">
+      <div class="card">
+        <div class="card-title">کیبورد</div>
+        <div class="setting-item">
+          <span class="setting-label">مدت Long-Press (میلی‌ثانیه)</span>
+          <div class="setting-control">
+            <input type="range" id="set-longpress" min="20" max="500" step="10" oninput="updateLongPress(this.value)">
+            <span id="longpress-val">300</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">ظاهر</div>
+        <div class="setting-item">
+          <span class="setting-label">سایز فونت پایه</span>
+          <div class="setting-control">
+            <input type="range" id="set-fontsize" min="14" max="22" step="1" oninput="updateFontSize(this.value)">
+            <span id="fontsize-val">16</span>
+          </div>
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">سایز سؤال آزمون</span>
+          <div class="setting-control">
+            <input type="range" id="set-qsize" min="1.8" max="4" step="0.2" oninput="updateQSize(this.value)">
+            <span id="qsize-val">2.8</span>
+          </div>
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">فونت</span>
+          <div class="setting-control">
+            <select id="set-font" onchange="updateFont(this.value)">
+              <option value="'Segoe UI', Tahoma, sans-serif">پیش‌فرض</option>
+              <option value="Tahoma, sans-serif">Tahoma</option>
+              <option value="'Courier New', monospace">Mono</option>
+              <option value="system-ui, sans-serif">System</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-item" style="flex-direction:column;align-items:flex-start;">
+          <span class="setting-label mb-2">رنگ‌ها</span>
+          <div class="color-row">
+            <div class="color-item"><input type="color" id="c-bg" value="#0f172a" onchange="updateColor('--bg-primary',this.value)"><span>پس‌زمینه</span></div>
+            <div class="color-item"><input type="color" id="c-card" value="#1e293b" onchange="updateColor('--bg-card',this.value)"><span>کارت</span></div>
+            <div class="color-item"><input type="color" id="c-accent" value="#3b82f6" onchange="updateColor('--accent',this.value)"><span>اکسنت</span></div>
+            <div class="color-item"><input type="color" id="c-key" value="#1e40af" onchange="updateColor('--key-bg',this.value)"><span>کلید</span></div>
+            <div class="color-item"><input type="color" id="c-text" value="#f1f5f9" onchange="updateColor('--text-primary',this.value)"><span>متن</span></div>
+            <div class="color-item"><input type="color" id="c-success" value="#22c55e" onchange="updateColor('--success',this.value)"><span>موفق</span></div>
+          </div>
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">حالت تاریک / روشن</span>
+          <div class="setting-control">
+            <button class="btn btn-sm" onclick="toggleTheme()">تغییر تم</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">سایر</div>
+        <div class="setting-item">
+          <span class="setting-label">ویبره هنگام درست/غلط</span>
+          <div class="setting-control">
+            <input type="checkbox" id="set-vibrate" checked onchange="store.settings.vibrate=this.checked;saveStore()">
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-block mt-2" onclick="exportData()">خروجی JSON</button>
+        <button class="btn btn-secondary btn-block mt-2" onclick="document.getElementById('import-file').click()">ورود JSON</button>
+        <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
+        <button class="btn btn-danger btn-block mt-2" onclick="if(confirm('همه داده‌ها، آزمون‌ها و رکوردها پاک شوند؟')){resetAll()}">پاک کردن همه چیز</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== QUIZ SCREEN ========== -->
+  <div id="screen-quiz" class="screen">
+    <div class="quiz-top">
+      <button class="header-btn" onclick="confirmExitQuiz()">✕</button>
+      <div class="quiz-progress" id="quiz-progress">1 / 10</div>
+      <div class="quiz-timer" id="quiz-timer">0:00</div>
+    </div>
+    <div class="quiz-body">
+      <div class="question-display" id="question-display">√2</div>
+      <div class="answer-line"></div>
+      <div class="answer-preview" id="answer-preview"></div>
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+    </div>
+    <div class="keyboard" id="keyboard">
+      <!-- generated by JS -->
+    </div>
+  </div>
+
+  <!-- ========== RESULT SCREEN ========== -->
+  <div id="screen-result" class="screen">
+    <div class="header">
+      <h1>نتیجه آزمون</h1>
+      <div style="width:40px"></div>
+    </div>
+    <div class="content">
+      <div class="result-score" id="result-score">0</div>
+      <div class="result-meta" id="result-meta"></div>
+      <div class="card">
+        <div class="card-title">جزئیات</div>
+        <div id="result-details"></div>
+      </div>
+      <div class="card" id="wrong-section">
+        <div class="card-title">سؤالات غلط / رد شده</div>
+        <div class="wrong-list" id="wrong-list"></div>
+      </div>
+      <button class="btn btn-block mt-2" onclick="showScreen('home')">بازگشت به خانه</button>
+      <button class="btn btn-secondary btn-block mt-2" onclick="retryQuiz()">تلاش مجدد</button>
+    </div>
+  </div>
+
+  <!-- ========== MODALS ========== -->
+  <div class="modal-overlay" id="modal-add-data">
+    <div class="modal">
+      <h2 id="modal-data-title">افزودن داده</h2>
+      <div class="form-group">
+        <label>سؤال (مثلاً √2 یا 2⁵)</label>
+        <input type="text" class="form-control" id="input-question" placeholder="√2" dir="ltr" style="text-align:left">
+      </div>
+      <div class="form-group">
+        <label>جواب (مثلاً 1.4)</label>
+        <input type="text" class="form-control" id="input-answer" placeholder="1.4" dir="ltr" style="text-align:left">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-add-data')">انصراف</button>
+        <button class="btn" onclick="saveDataItem()">ذخیره</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-create-quiz">
+    <div class="modal">
+      <h2 id="modal-quiz-title">ساخت آزمون</h2>
+      <div class="form-group">
+        <label>نام آزمون</label>
+        <input type="text" class="form-control" id="input-quiz-name" placeholder="مثلاً رادیکال‌ها">
+      </div>
+      <div class="form-group">
+        <label>انتخاب داده‌ها</label>
+        <div id="quiz-data-checks" style="max-height:240px;overflow-y:auto;"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-create-quiz')">انصراف</button>
+        <button class="btn" onclick="saveQuiz()">ذخیره</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-start-quiz">
+    <div class="modal">
+      <h2>شروع آزمون</h2>
+      <div class="form-group">
+        <label>آزمون</label>
+        <select class="form-control" id="start-quiz-select"></select>
+      </div>
+      <div class="form-group">
+        <label>تعداد سؤال (۰ = همه)</label>
+        <input type="number" class="form-control" id="start-quiz-count" value="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>حالت</label>
+        <select class="form-control" id="start-quiz-mode">
+          <option value="normal">عادی</option>
+          <option value="blind">Blind (بدون نمایش سؤال)</option>
+          <option value="flash">Flash Blind (۰.۸ ثانیه)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" id="start-quiz-shuffle" checked> تصادفی کردن ترتیب</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-start-quiz')">انصراف</button>
+        <button class="btn btn-success" onclick="startQuiz()">شروع</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ==================== STORE ====================
+    const DEFAULT_SETTINGS = {
+      longPressMs: 300,
+      fontSize: 16,
+      questionSize: 2.8,
+      font: "'Segoe UI', Tahoma, sans-serif",
+      vibrate: true,
+      theme: 'dark',
+      colors: {
+        '--bg-primary': '#0f172a',
+        '--bg-secondary': '#1e293b',
+        '--bg-card': '#1e293b',
+        '--bg-input': '#334155',
+        '--text-primary': '#f1f5f9',
+        '--text-secondary': '#94a3b8',
+        '--accent': '#3b82f6',
+        '--key-bg': '#1e40af',
+        '--success': '#22c55e',
+        '--danger': '#ef4444'
+      }
+    };
+
+    let store = {
+      data: [],
+      quizzes: [],
+      records: [],
+      settings: { ...DEFAULT_SETTINGS }
+    };
+
+    function loadStore() {
+      try {
+        const raw = localStorage.getItem('mathmax_store');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          store = { ...store, ...parsed };
+          store.settings = { ...DEFAULT_SETTINGS, ...(parsed.settings || {}) };
+        }
+      } catch (e) { console.error(e); }
+      applySettings();
+    }
+
+    function saveStore() {
+      localStorage.setItem('mathmax_store', JSON.stringify(store));
+    }
+
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    }
+
+    // ==================== SETTINGS APPLY ====================
+    function applySettings() {
+      const s = store.settings;
+      document.documentElement.style.setProperty('--font-size-base', s.fontSize + 'px');
+      document.documentElement.style.setProperty('--font-size-question', s.questionSize + 'rem');
+      document.documentElement.style.setProperty('--font-main', s.font);
+      document.documentElement.style.setProperty('--long-press-ms', s.longPressMs);
+      Object.entries(s.colors || {}).forEach(([k, v]) => {
+        document.documentElement.style.setProperty(k, v);
+      });
+      // update UI controls
+      const lp = document.getElementById('set-longpress');
+      if (lp) { lp.value = s.longPressMs; document.getElementById('longpress-val').textContent = s.longPressMs; }
+      const fs = document.getElementById('set-fontsize');
+      if (fs) { fs.value = s.fontSize; document.getElementById('fontsize-val').textContent = s.fontSize; }
+      const qs = document.getElementById('set-qsize');
+      if (qs) { qs.value = s.questionSize; document.getElementById('qsize-val').textContent = s.questionSize; }
+      const fontSel = document.getElementById('set-font');
+      if (fontSel) fontSel.value = s.font;
+      const vib = document.getElementById('set-vibrate');
+      if (vib) vib.checked = s.vibrate;
+    }
+
+    function updateLongPress(v) {
+      store.settings.longPressMs = +v;
+      document.getElementById('longpress-val').textContent = v;
+      saveStore();
+    }
+    function updateFontSize(v) {
+      store.settings.fontSize = +v;
+      document.getElementById('fontsize-val').textContent = v;
+      document.documentElement.style.setProperty('--font-size-base', v + 'px');
+      saveStore();
+    }
+    function updateQSize(v) {
+      store.settings.questionSize = +v;
+      document.getElementById('qsize-val').textContent = v;
+      document.documentElement.style.setProperty('--font-size-question', v + 'rem');
+      saveStore();
+    }
+    function updateFont(v) {
+      store.settings.font = v;
+      document.documentElement.style.setProperty('--font-main', v);
+      saveStore();
+    }
+    function updateColor(prop, val) {
+      store.settings.colors[prop] = val;
+      document.documentElement.style.setProperty(prop, val);
+      saveStore();
+    }
+    function toggleTheme() {
+      const isDark = store.settings.theme === 'dark';
+      if (isDark) {
+        store.settings.theme = 'light';
+        store.settings.colors = {
+          '--bg-primary': '#f8fafc',
+          '--bg-secondary': '#e2e8f0',
+          '--bg-card': '#ffffff',
+          '--bg-input': '#e2e8f0',
+          '--text-primary': '#0f172a',
+          '--text-secondary': '#64748b',
+          '--accent': '#2563eb',
+          '--key-bg': '#3b82f6',
+          '--success': '#16a34a',
+          '--danger': '#dc2626'
+        };
+      } else {
+        store.settings.theme = 'dark';
+        store.settings.colors = { ...DEFAULT_SETTINGS.colors };
+      }
+      applySettings();
+      saveStore();
+    }
+
+    // ==================== NAVIGATION ====================
+    function showScreen(name) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const el = document.getElementById('screen-' + name);
+      if (el) el.classList.add('active');
+      // update nav
+      document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
+      // re-render needed screens
+      if (name === 'home') renderHome();
+      if (name === 'data') renderDataList();
+      if (name === 'quizzes') renderQuizList();
+      if (name === 'records') renderRecords();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+    }
+
+    function toast(msg, ms = 2200) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), ms);
+    }
+
+    // ==================== DATA ====================
+    let editingDataId = null;
+
+    function openAddData(id = null) {
+      editingDataId = id;
+      document.getElementById('modal-data-title').textContent = id ? 'ویرایش داده' : 'افزودن داده';
+      if (id) {
+        const item = store.data.find(d => d.id === id);
+        document.getElementById('input-question').value = item.question;
+        document.getElementById('input-answer').value = item.answer;
+      } else {
+        document.getElementById('input-question').value = '';
+        document.getElementById('input-answer').value = '';
+      }
+      openModal('modal-add-data');
+    }
+
+    function saveDataItem() {
+      const q = document.getElementById('input-question').value.trim();
+      const a = document.getElementById('input-answer').value.trim();
+      if (!q || !a) { toast('سؤال و جواب الزامی است'); return; }
+      if (editingDataId) {
+        const item = store.data.find(d => d.id === editingDataId);
+        item.question = q;
+        item.answer = a;
+      } else {
+        store.data.push({ id: uid(), question: q, answer: a, createdAt: Date.now() });
+      }
+      saveStore();
+      closeModal('modal-add-data');
+      renderDataList();
+      toast('ذخیره شد');
+    }
+
+    function deleteData(id) {
+      if (!confirm('حذف این داده؟')) return;
+      store.data = store.data.filter(d => d.id !== id);
+      // also clean from quizzes
+      store.quizzes.forEach(qz => {
+        qz.itemIds = qz.itemIds.filter(i => i !== id);
+      });
+      saveStore();
+      renderDataList();
+      toast('حذف شد');
+    }
+
+    function renderDataList() {
+      const search = (document.getElementById('data-search')?.value || '').toLowerCase();
+      const list = document.getElementById('data-list');
+      const empty = document.getElementById('data-empty');
+      let items = store.data;
+      if (search) {
+        items = items.filter(d => d.question.toLowerCase().includes(search) || d.answer.toLowerCase().includes(search));
+      }
+      if (items.length === 0) {
+        list.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      list.innerHTML = items.map(d => `
+        <div class="data-item">
+          <div>
+            <div class="q" dir="ltr">${escapeHtml(d.question)}</div>
+            <div class="a" dir="ltr">= ${escapeHtml(d.answer)}</div>
+          </div>
+          <div class="data-actions">
+            <button class="icon-btn" onclick="openAddData('${d.id}')">✏️</button>
+            <button class="icon-btn danger" onclick="deleteData('${d.id}')">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ==================== QUIZZES ====================
+    let editingQuizId = null;
+
+    function openCreateQuiz(id = null) {
+      editingQuizId = id;
+      document.getElementById('modal-quiz-title').textContent = id ? 'ویرایش آزمون' : 'ساخت آزمون';
+      const checks = document.getElementById('quiz-data-checks');
+      if (store.data.length === 0) {
+        checks.innerHTML = '<p style="color:var(--text-secondary)">اول باید داده اضافه کنی</p>';
+      } else {
+        const selected = id ? (store.quizzes.find(q => q.id === id)?.itemIds || []) : [];
+        checks.innerHTML = store.data.map(d => `
+          <label class="check-item">
+            <input type="checkbox" value="${d.id}" ${selected.includes(d.id) ? 'checked' : ''}>
+            <div class="info">
+              <div dir="ltr"><strong>${escapeHtml(d.question)}</strong> = ${escapeHtml(d.answer)}</div>
+            </div>
+          </label>
+        `).join('');
+      }
+      if (id) {
+        const qz = store.quizzes.find(q => q.id === id);
+        document.getElementById('input-quiz-name').value = qz.name;
+      } else {
+        document.getElementById('input-quiz-name').value = '';
+      }
+      openModal('modal-create-quiz');
+    }
+
+    function saveQuiz() {
+      const name = document.getElementById('input-quiz-name').value.trim();
+      if (!name) { toast('نام آزمون الزامی است'); return; }
+      const checks = document.querySelectorAll('#quiz-data-checks input:checked');
+      const itemIds = Array.from(checks).map(c => c.value);
+      if (itemIds.length === 0) { toast('حداقل یک داده انتخاب کن'); return; }
+      if (editingQuizId) {
+        const qz = store.quizzes.find(q => q.id === editingQuizId);
+        qz.name = name;
+        qz.itemIds = itemIds;
+      } else {
+        store.quizzes.push({ id: uid(), name, itemIds, createdAt: Date.now() });
+      }
+      saveStore();
+      closeModal('modal-create-quiz');
+      renderQuizList();
+      toast('آزمون ذخیره شد');
+    }
+
+    function deleteQuiz(id) {
+      if (!confirm('حذف این آزمون؟')) return;
+      store.quizzes = store.quizzes.filter(q => q.id !== id);
+      saveStore();
+      renderQuizList();
+      toast('حذف شد');
+    }
+
+    function renderQuizList() {
+      const list = document.getElementById('quiz-list');
+      const empty = document.getElementById('quiz-empty');
+      if (store.quizzes.length === 0) {
+        list.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      list.innerHTML = store.quizzes.map(q => `
+        <div class="quiz-card">
+          <h3>${escapeHtml(q.name)}</h3>
+          <div class="meta">${q.itemIds.length} سؤال</div>
+          <div class="flex-gap mt-2">
+            <button class="btn btn-sm" onclick="prepareStartQuiz('${q.id}')">شروع</button>
+            <button class="btn btn-sm btn-secondary" onclick="openCreateQuiz('${q.id}')">ویرایش</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteQuiz('${q.id}')">حذف</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ==================== QUIZ ENGINE ====================
+    let quizState = null;
+
+    function openQuizSelector() {
+      if (store.quizzes.length === 0) {
+        toast('اول یک آزمون بساز');
+        showScreen('quizzes');
+        return;
+      }
+      const sel = document.getElementById('start-quiz-select');
+      sel.innerHTML = store.quizzes.map(q => `<option value="${q.id}">${escapeHtml(q.name)} (${q.itemIds.length})</option>`).join('');
+      openModal('modal-start-quiz');
+    }
+
+    function prepareStartQuiz(id) {
+      document.getElementById('start-quiz-select').value = id;
+      openModal('modal-start-quiz');
+    }
+
+    function startQuiz() {
+      const quizId = document.getElementById('start-quiz-select').value;
+      const count = parseInt(document.getElementById('start-quiz-count').value) || 0;
+      const mode = document.getElementById('start-quiz-mode').value;
+      const shuffle = document.getElementById('start-quiz-shuffle').checked;
+      const quiz = store.quizzes.find(q => q.id === quizId);
+      if (!quiz) return;
+
+      let items = quiz.itemIds.map(id => store.data.find(d => d.id === id)).filter(Boolean);
+      if (items.length === 0) { toast('این آزمون داده معتبری ندارد'); return; }
+      if (shuffle) items = shuffleArray(items);
+      if (count > 0 && count < items.length) items = items.slice(0, count);
+
+      quizState = {
+        quizId,
+        quizName: quiz.name,
+        items,
+        index: 0,
+        correct: 0,
+        wrongs: [],
+        skipped: [],
+        currentAnswer: '',
+        startTime: Date.now(),
+        timerInterval: null,
+        mode,
+        waitingCorrect: false,
+        flashTimeout: null
+      };
+
+      closeModal('modal-start-quiz');
+      showScreen('quiz');
+      buildKeyboard();
+      nextQuestion(true);
+      startTimer();
+    }
+
+    function startTimer() {
+      const el = document.getElementById('quiz-timer');
+      quizState.timerInterval = setInterval(() => {
+        const elapsed = Date.now() - quizState.startTime;
+        el.textContent = formatTime(elapsed);
+      }, 200);
+    }
+
+    function stopTimer() {
+      if (quizState?.timerInterval) clearInterval(quizState.timerInterval);
+    }
+
+    function formatTime(ms) {
+      const s = Math.floor(ms / 1000);
+      const m = Math.floor(s / 60);
+      const sec = s % 60;
+      return m + ':' + sec.toString().padStart(2, '0');
+    }
+
+    function nextQuestion(isFirst = false) {
+      if (!isFirst) quizState.index++;
+      if (quizState.index >= quizState.items.length) {
+        finishQuiz();
+        return;
+      }
+      quizState.currentAnswer = '';
+      quizState.waitingCorrect = false;
+      document.getElementById('answer-preview').textContent = '';
+      document.getElementById('answer-preview').className = 'answer-preview';
+      document.getElementById('quiz-feedback').innerHTML = '';
+      document.getElementById('quiz-progress').textContent = `${quizState.index + 1} / ${quizState.items.length}`;
+
+      const item = quizState.items[quizState.index];
+      const qEl = document.getElementById('question-display');
+
+      if (quizState.mode === 'blind') {
+        qEl.textContent = '؟؟؟';
+        qEl.style.opacity = '0.4';
+      } else if (quizState.mode === 'flash') {
+        qEl.textContent = item.question;
+        qEl.style.opacity = '1';
+        if (quizState.flashTimeout) clearTimeout(quizState.flashTimeout);
+        quizState.flashTimeout = setTimeout(() => {
+          qEl.textContent = '؟؟؟';
+          qEl.style.opacity = '0.4';
+        }, 800);
+      } else {
+        qEl.textContent = item.question;
+        qEl.style.opacity = '1';
+      }
+    }
+
+    function onKey(val) {
+      if (!quizState) return;
+      if (val === 'back') {
+        quizState.currentAnswer = quizState.currentAnswer.slice(0, -1);
+      } else if (val === 'enter') {
+        checkAnswer();
+        return;
+      } else {
+        // limit length
+        if (quizState.currentAnswer.length < 20) {
+          quizState.currentAnswer += val;
+        }
+      }
+      document.getElementById('answer-preview').textContent = quizState.currentAnswer;
+      document.getElementById('answer-preview').className = 'answer-preview';
+    }
+
+    function checkAnswer() {
+      if (!quizState || !quizState.currentAnswer) return;
+      const item = quizState.items[quizState.index];
+      const userAns = quizState.currentAnswer.trim();
+      const correctAns = item.answer.trim();
+
+      // normalize for comparison (allow 1.4 and 1.40 etc loosely)
+      const isCorrect = normalizeAns(userAns) === normalizeAns(correctAns);
+
+      if (isCorrect) {
+        quizState.correct++;
+        quizState.waitingCorrect = false;
+        document.getElementById('answer-preview').className = 'answer-preview correct';
+        if (store.settings.vibrate && navigator.vibrate) navigator.vibrate(30);
+        document.getElementById('quiz-feedback').innerHTML = '';
+        setTimeout(() => nextQuestion(), 350);
+      } else {
+        // track as wrong attempt (even if later corrected)
+        const already = quizState.wrongs.find(w => w.question === item.question);
+        if (!already) {
+          quizState.wrongs.push({ question: item.question, answer: item.answer, user: userAns });
+        } else {
+          already.user = userAns; // update last attempt
+        }
+        document.getElementById('answer-preview').className = 'answer-preview wrong';
+        if (store.settings.vibrate && navigator.vibrate) navigator.vibrate([40, 30, 40]);
+        quizState.waitingCorrect = true;
+        // show skip button
+        document.getElementById('quiz-feedback').innerHTML = `
+          <button class="btn btn-warning btn-sm" onclick="skipQuestion()">رد کردن سؤال</button>
+        `;
+      }
+    }
+
+    function skipQuestion() {
+      if (!quizState) return;
+      const item = quizState.items[quizState.index];
+      // remove from wrongs if was there, put in skipped
+      quizState.wrongs = quizState.wrongs.filter(w => w.question !== item.question);
+      quizState.skipped.push({ question: item.question, answer: item.answer, user: quizState.currentAnswer || undefined });
+      quizState.waitingCorrect = false;
+      nextQuestion();
+    }
+
+
+    // when user keeps typing after wrong, we just update preview; they must enter correct or skip
+
+    function normalizeAns(s) {
+      return s.replace(/٫/g, '.').replace(/,/g, '.').replace(/\s/g, '').toLowerCase();
+    }
+
+    function finishQuiz() {
+      stopTimer();
+      const elapsed = Date.now() - quizState.startTime;
+      const total = quizState.items.length;
+      const correct = quizState.correct;
+      // score formula: (correct * 100) - (seconds)
+      const seconds = Math.floor(elapsed / 1000);
+      const score = Math.max(0, correct * 100 - seconds);
+
+      // remaining unanswered count as wrong if any (shouldn't happen)
+      const record = {
+        id: uid(),
+        quizId: quizState.quizId,
+        quizName: quizState.quizName,
+        score,
+        timeMs: elapsed,
+        correct,
+        total,
+        wrongs: quizState.wrongs,
+        skipped: quizState.skipped,
+        date: Date.now(),
+        mode: quizState.mode
+      };
+      store.records.unshift(record);
+      // keep last 100
+      if (store.records.length > 100) store.records = store.records.slice(0, 100);
+      saveStore();
+
+      // show result
+      document.getElementById('result-score').textContent = score;
+      document.getElementById('result-meta').innerHTML = `
+        زمان: ${formatTime(elapsed)} &nbsp;|&nbsp; درست: ${correct} از ${total}
+        <br>آزمون: ${escapeHtml(quizState.quizName)}
+      `;
+      document.getElementById('result-details').innerHTML = `
+        <div>امتیاز = (تعداد درست × ۱۰۰) − ثانیه‌ها</div>
+        <div style="margin-top:8px">حالت: ${quizState.mode === 'normal' ? 'عادی' : quizState.mode === 'blind' ? 'Blind' : 'Flash Blind'}</div>
+      `;
+
+      const wrongList = document.getElementById('wrong-list');
+      const wrongSection = document.getElementById('wrong-section');
+      const allBad = [...quizState.wrongs, ...quizState.skipped];
+      if (allBad.length === 0) {
+        wrongSection.classList.add('hidden');
+      } else {
+        wrongSection.classList.remove('hidden');
+        wrongList.innerHTML = allBad.map(w => `
+          <div class="wrong-item">
+            <div>
+              <div class="q" dir="ltr">${escapeHtml(w.question)} = ${escapeHtml(w.answer)}</div>
+              ${w.user ? `<div style="font-size:0.85rem;color:var(--text-secondary)">جواب تو: ${escapeHtml(w.user)}</div>` : ''}
+            </div>
+            <span class="tag ${w.user === undefined ? 'skip' : ''}">${w.user === undefined ? 'رد شده' : 'غلط'}</span>
+          </div>
+        `).join('');
+      }
+
+      // note: currently wrongs array is not populated because we force correct or skip.
+      // If user wants to record wrong attempts, we can push before skip.
+      // For now skipped are tracked. Let's also track last wrong attempt if any.
+
+      showScreen('result');
+      quizState = null;
+    }
+
+    // improve: when wrong and they finally get it right, we don't count as wrong.
+    // If they skip, it's skipped. Perfect as requested.
+
+    function confirmExitQuiz() {
+      if (confirm('آزمون ناتمام بماند و خارج شوی؟')) {
+        stopTimer();
+        quizState = null;
+        showScreen('home');
+      }
+    }
+
+    function retryQuiz() {
+      // re-open last quiz if possible
+      openQuizSelector();
+    }
+
+    // ==================== KEYBOARD ====================
+    const KEY_MAP = [
+      { main: '1', alt: '√' },
+      { main: '2', alt: '²' },
+      { main: '3', alt: '³' },
+      { main: '4', alt: '!' },
+      { main: '5', alt: 'π' },
+      { main: '6', alt: '/' },
+      { main: '7', alt: '÷' },
+      { main: '8', alt: '^' },
+      { main: '9', alt: '(' },
+      { main: '0', alt: ')' },
+      { main: '.', alt: '-' },
+      { main: 'back', alt: '' }
+    ];
+
+    function buildKeyboard() {
+      const kb = document.getElementById('keyboard');
+      // layout: 1 2 3 / 4 5 6 / 7 8 9 / . 0 back   + Enter row? 
+      // To match image closely: 3 cols, then 0 and back, and we add enter.
+      let html = '';
+      const order = [
+        ['1','2','3'],
+        ['4','5','6'],
+        ['7','8','9'],
+        ['.','0','back']
+      ];
+      order.forEach(row => {
+        row.forEach(k => {
+          const map = KEY_MAP.find(m => m.main === k) || { main: k, alt: '' };
+          const isBack = k === 'back';
+          html += `<button class="key ${isBack ? 'backspace' : ''}" data-main="${map.main}" data-alt="${map.alt}">
+            ${isBack ? '⌫' : map.main}
+            ${map.alt ? `<span class="alt">${map.alt}</span>` : ''}
+          </button>`;
+        });
+      });
+      // add enter as full width-ish
+      html += `<button class="key enter" data-main="enter" style="grid-column: span 3; height:52px;">تأیید ✓</button>`;
+      kb.innerHTML = html;
+
+      // attach listeners
+      kb.querySelectorAll('.key').forEach(btn => {
+        let pressTimer = null;
+        let longFired = false;
+
+        const start = (e) => {
+          e.preventDefault();
+          longFired = false;
+          btn.classList.add('pressed');
+          const alt = btn.dataset.alt;
+          if (alt) {
+            pressTimer = setTimeout(() => {
+              longFired = true;
+              onKey(alt);
+              if (store.settings.vibrate && navigator.vibrate) navigator.vibrate(15);
+            }, store.settings.longPressMs || 300);
+          }
+        };
+        const end = (e) => {
+          e.preventDefault();
+          btn.classList.remove('pressed');
+          clearTimeout(pressTimer);
+          if (!longFired) {
+            const main = btn.dataset.main;
+            if (main === 'back') onKey('back');
+            else if (main === 'enter') onKey('enter');
+            else onKey(main);
+          }
+        };
+        const cancel = () => {
+          clearTimeout(pressTimer);
+          btn.classList.remove('pressed');
+        };
+
+        btn.addEventListener('touchstart', start, { passive: false });
+        btn.addEventListener('touchend', end, { passive: false });
+        btn.addEventListener('touchcancel', cancel);
+        btn.addEventListener('mousedown', start);
+        btn.addEventListener('mouseup', end);
+        btn.addEventListener('mouseleave', cancel);
+      });
+    }
+
+    // ==================== RECORDS & HOME ====================
+    function renderHome() {
+      const best = store.records.length ? Math.max(...store.records.map(r => r.score)) : null;
+      document.getElementById('stat-best').textContent = best !== null ? best : '—';
+      document.getElementById('stat-count').textContent = store.records.length;
+
+      const list = document.getElementById('home-records');
+      if (store.records.length === 0) {
+        list.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:12px">هنوز رکوردی نیست</p>';
+        return;
+      }
+      list.innerHTML = store.records.slice(0, 5).map(r => `
+        <div class="record-item">
+          <div>
+            <div>${escapeHtml(r.quizName)}</div>
+            <div style="font-size:0.8rem;color:var(--text-secondary)">${formatDate(r.date)} · ${formatTime(r.timeMs)}</div>
+          </div>
+          <div class="record-score">${r.score}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderRecords() {
+      const list = document.getElementById('records-list');
+      const empty = document.getElementById('records-empty');
+      if (store.records.length === 0) {
+        list.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      list.innerHTML = store.records.map(r => `
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:600">${escapeHtml(r.quizName)}</div>
+              <div style="font-size:0.85rem;color:var(--text-secondary)">${formatDate(r.date)}</div>
+            </div>
+            <div style="text-align:left">
+              <div style="font-size:1.4rem;font-weight:700;color:var(--success)">${r.score}</div>
+              <div style="font-size:0.8rem;color:var(--text-secondary)">${formatTime(r.timeMs)} · ${r.correct}/${r.total}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function formatDate(ts) {
+      const d = new Date(ts);
+      return d.toLocaleDateString('fa-IR') + ' ' + d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ==================== UTILS ====================
+    function escapeHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(store, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mathmax-backup.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('خروجی گرفته شد');
+    }
+
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (data.data && data.quizzes) {
+            store = { ...store, ...data };
+            saveStore();
+            applySettings();
+            renderHome();
+            toast('با موفقیت وارد شد');
+          } else toast('فایل نامعتبر');
+        } catch (err) { toast('خطا در خواندن فایل'); }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    }
+
+    function resetAll() {
+      store = { data: [], quizzes: [], records: [], settings: { ...DEFAULT_SETTINGS } };
+      saveStore();
+      applySettings();
+      renderHome();
+      toast('همه چیز پاک شد');
+    }
+
+    // ==================== INIT ====================
+    loadStore();
+    renderHome();
+
+    // sample data if empty (for first run)
+    if (store.data.length === 0) {
+      store.data = [
+        { id: uid(), question: '√2', answer: '1.4', createdAt: Date.now() },
+        { id: uid(), question: '√3', answer: '1.7', createdAt: Date.now() },
+        { id: uid(), question: '2⁵', answer: '32', createdAt: Date.now() },
+        { id: uid(), question: 'π', answer: '3.14', createdAt: Date.now() },
+        { id: uid(), question: '5!', answer: '120', createdAt: Date.now() }
+      ];
+      store.quizzes = [
+        { id: uid(), name: 'نمونه اولیه', itemIds: store.data.map(d => d.id), createdAt: Date.now() }
+      ];
+      saveStore();
+    }
+
+    // PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
