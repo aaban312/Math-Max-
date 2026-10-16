@@ -346,16 +346,44 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-title">سایر</div>
+        <div class="card-title">صدا و ویبره</div>
+        <div class="setting-item">
+          <span class="setting-label">فعال بودن صدا</span>
+          <div class="setting-control"><input type="checkbox" id="set-sound" checked onchange="store.settings.soundEnabled=this.checked;saveStore()"></div>
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">صدای صحیح (بلندی)</span>
+          <div class="setting-control">
+            <input type="range" id="set-sound-correct" min="0" max="100" step="5" oninput="store.settings.soundCorrectVol=this.value/100;document.getElementById('sound-correct-val').textContent=this.value;saveStore()">
+            <span id="sound-correct-val">60</span>
+          </div>
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">صدای غلط (بلندی)</span>
+          <div class="setting-control">
+            <input type="range" id="set-sound-wrong" min="0" max="100" step="5" oninput="store.settings.soundWrongVol=this.value/100;document.getElementById('sound-wrong-val').textContent=this.value;saveStore()">
+            <span id="sound-wrong-val">50</span>
+          </div>
+        </div>
         <div class="setting-item">
           <span class="setting-label">ویبره</span>
           <div class="setting-control"><input type="checkbox" id="set-vibrate" checked onchange="store.settings.vibrate=this.checked;saveStore()"></div>
         </div>
+        <div class="setting-item">
+          <span class="setting-label">قدرت ویبره</span>
+          <div class="setting-control">
+            <input type="range" id="set-vibrate-int" min="0" max="100" step="5" oninput="store.settings.vibrateIntensity=+this.value;document.getElementById('vibrate-int-val').textContent=this.value;saveStore()">
+            <span id="vibrate-int-val">50</span>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-block mt-2" onclick="playCorrectSound(); if(store.settings.vibrate) doVibrate(true)">تست صدای صحیح</button>
+        <button class="btn btn-secondary btn-block mt-2" onclick="playWrongSound(); if(store.settings.vibrate) doVibrate(false)">تست صدای غلط</button>
         <button class="btn btn-secondary btn-block mt-2" onclick="exportData()">خروجی JSON</button>
         <button class="btn btn-secondary btn-block mt-2" onclick="document.getElementById('import-file').click()">ورود JSON</button>
         <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
         <button class="btn btn-danger btn-block mt-2" onclick="if(confirm('همه چیز پاک شود؟')){resetAll()}">پاک کردن همه</button>
       </div>
+
     </div>
   </div>
 
@@ -451,6 +479,10 @@
       keySize: 64,
       showEnter: false,
       vibrate: true,
+      vibrateIntensity: 50, // 0-100
+      soundEnabled: true,
+      soundCorrectVol: 0.6,
+      soundWrongVol: 0.5,
       theme: 'light',
       colors: {
         '--bg-primary': '#eef3f8',
@@ -465,6 +497,7 @@
         '--danger': '#dc2626'
       }
     };
+
 
     let store = { data: [], quizzes: [], records: [], settings: {...DEFAULT_SETTINGS} };
 
@@ -507,7 +540,12 @@
       const qs = document.getElementById('set-qsize'); if(qs){ qs.value=s.questionSize; document.getElementById('qsize-val').textContent=s.questionSize; }
       const se = document.getElementById('set-showenter'); if(se) se.checked = !!s.showEnter;
       const vib = document.getElementById('set-vibrate'); if(vib) vib.checked = s.vibrate;
+      const snd = document.getElementById('set-sound'); if(snd) snd.checked = !!s.soundEnabled;
+      const sc = document.getElementById('set-sound-correct'); if(sc){ sc.value = Math.round((s.soundCorrectVol||0.6)*100); document.getElementById('sound-correct-val').textContent = sc.value; }
+      const sw = document.getElementById('set-sound-wrong'); if(sw){ sw.value = Math.round((s.soundWrongVol||0.5)*100); document.getElementById('sound-wrong-val').textContent = sw.value; }
+      const vi = document.getElementById('set-vibrate-int'); if(vi){ vi.value = s.vibrateIntensity||50; document.getElementById('vibrate-int-val').textContent = vi.value; }
     }
+
 
     function updateLongPress(v){ store.settings.longPressMs=+v; document.getElementById('longpress-val').textContent=v; saveStore(); }
     function updateKeySize(v){ store.settings.keySize=+v; document.getElementById('keysize-val').textContent=v; document.documentElement.style.setProperty('--key-size',v+'px'); document.documentElement.style.setProperty('--key-font',(v/38)+'rem'); saveStore(); }
@@ -748,10 +786,12 @@
       if(!already) quizState.wrongs.push({question:item.question,answer:item.answer,user:userAns});
       else already.user=userAns;
       document.getElementById('answer-preview').className='answer-preview wrong';
-      if(store.settings.vibrate&&navigator.vibrate) navigator.vibrate([40,30,40]);
+      playWrongSound();
+      doVibrate(false);
       quizState.waitingCorrect=true;
       document.getElementById('quiz-feedback').innerHTML=`<button class="btn btn-warning btn-sm" onclick="skipQuestion()">رد کردن سؤال</button>`;
     }
+
 
     function checkAnswer(){
       if(!quizState||!quizState.currentAnswer) return;
@@ -771,12 +811,14 @@
         quizState.correct++;
         quizState.waitingCorrect=false;
         document.getElementById('answer-preview').className='answer-preview correct';
-        if(store.settings.vibrate&&navigator.vibrate) navigator.vibrate(30);
+        playCorrectSound();
+        doVibrate(true);
         document.getElementById('quiz-feedback').innerHTML='';
         setTimeout(()=>nextQuestion(),300);
       } else {
         markWrong(userAns);
       }
+
     }
 
 
@@ -790,6 +832,62 @@
     }
 
     function normalizeAns(s){ return s.replace(/٫/g,'.').replace(/,/g,'.').replace(/\s/g,'').toLowerCase(); }
+
+    // ========== صدا و ویبره ==========
+    let audioCtx = null;
+    function getAudioCtx(){
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playTone(freq, duration, type, vol, slideTo){
+      if(!store.settings.soundEnabled) return;
+      try {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        if(slideTo) osc.frequency.linearRampToValueAtTime(slideTo, ctx.currentTime + duration*0.8);
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + duration + 0.05);
+      } catch(e){}
+    }
+
+    function playCorrectSound(){
+      const vol = store.settings.soundCorrectVol || 0.6;
+      // صدای شاد و کوتاه شبیه چایم موفقیت
+      playTone(523.25, 0.12, 'sine', vol);          // C5
+      setTimeout(() => playTone(659.25, 0.12, 'sine', vol*0.9), 90); // E5
+      setTimeout(() => playTone(783.99, 0.18, 'sine', vol*0.8), 180); // G5
+    }
+
+    function playWrongSound(){
+      const vol = store.settings.soundWrongVol || 0.5;
+      // صدای پایین و کوتاه برای خطا
+      playTone(180, 0.18, 'triangle', vol, 120);
+      setTimeout(() => playTone(140, 0.22, 'triangle', vol*0.7), 120);
+    }
+
+    function doVibrate(isCorrect){
+      if(!store.settings.vibrate || !navigator.vibrate) return;
+      const intensity = (store.settings.vibrateIntensity || 50) / 100;
+      if(isCorrect){
+        const dur = Math.round(25 + intensity * 40);
+        navigator.vibrate(dur);
+      } else {
+        const d1 = Math.round(35 + intensity * 40);
+        const d2 = Math.round(25 + intensity * 30);
+        navigator.vibrate([d1, 40, d2]);
+      }
+    }
+
 
     function finishQuiz(){
       stopTimer();
