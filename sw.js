@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathmax-v1';
+const CACHE_NAME = 'mathmax-v3';
 const ASSETS = [
   './',
   './index.html',
