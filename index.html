@@ -100,7 +100,14 @@
     .quiz-progress { font-size:0.95rem; color:var(--text-secondary); }
     .quiz-timer { font-size:1.1rem; font-weight:700; color:var(--accent); background:var(--bg-input); padding:6px 14px; border-radius:20px; }
     .quiz-body { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
-    .question-display { font-size:var(--font-size-question); font-weight:700; text-align:center; margin-bottom:12px; min-height:1.2em; direction:ltr; font-family:'Segoe UI', system-ui, sans-serif; color:var(--text-primary); }
+    .question-display { font-size:var(--font-size-question); font-weight:700; text-align:center; margin-bottom:12px; min-height:1.2em; direction:ltr; font-family:'Segoe UI', system-ui, sans-serif; color:var(--text-primary); line-height:1.3; }
+    .frac { display:inline-block; text-align:center; vertical-align:middle; margin:0 2px; }
+    .frac .num { display:block; border-bottom:2px solid currentColor; padding:0 4px 1px; line-height:1.1; }
+    .frac .den { display:block; padding:1px 4px 0; line-height:1.1; }
+    .radical { position:relative; display:inline-block; margin:0 2px; }
+    .radical::before { content:"√"; font-size:1.1em; }
+    .radical .radicand { border-top:2px solid currentColor; padding:0 4px 0 1px; margin-left:-0.15em; }
+
     .answer-line { width:60%; max-width:280px; height:3px; background:var(--accent); margin-bottom:20px; border-radius:2px; }
     .answer-preview { font-size:1.8rem; min-height:2.2rem; color:var(--text-primary); direction:ltr; font-weight:600; letter-spacing:1px; }
     .answer-preview.wrong { color:var(--danger); animation:shake 0.3s; }
@@ -385,7 +392,7 @@
   <div class="modal-overlay" id="modal-add-data">
     <div class="modal">
       <h2 id="modal-data-title">افزودن داده</h2>
-      <div class="form-group"><label>سؤال</label><input type="text" class="form-control" id="input-question" placeholder="√2" dir="ltr" style="text-align:left"></div>
+      <div class="form-group"><label>سؤال (مثال: √2 یا \frac{1}{2} یا 3/4)</label><input type="text" class="form-control" id="input-question" placeholder="√2 یا \frac{3}{4}" dir="ltr" style="text-align:left"></div>
       <div class="form-group"><label>جواب</label><input type="text" class="form-control" id="input-answer" placeholder="1.4" dir="ltr" style="text-align:left"></div>
       <div class="modal-actions">
         <button class="btn btn-secondary" onclick="closeModal('modal-add-data')">انصراف</button>
@@ -567,7 +574,7 @@
       if(search) items=items.filter(d=>d.question.toLowerCase().includes(search)||d.answer.toLowerCase().includes(search));
       if(items.length===0){ list.innerHTML=''; empty.classList.remove('hidden'); return; }
       empty.classList.add('hidden');
-      list.innerHTML=items.map(d=>`<div class="data-item"><div><div class="q" dir="ltr">${escapeHtml(d.question)}</div><div class="a" dir="ltr">= ${escapeHtml(d.answer)}</div></div><div class="data-actions"><button class="icon-btn" onclick="openAddData('${d.id}')">✏️</button><button class="icon-btn danger" onclick="deleteData('${d.id}')">🗑️</button></div></div>`).join('');
+      list.innerHTML=items.map(d=>`<div class="data-item"><div><div class="q" dir="ltr">${renderMath(d.question)}</div><div class="a" dir="ltr">= ${escapeHtml(d.answer)}</div></div><div class="data-actions"><button class="icon-btn" onclick="openAddData('${d.id}')">✏️</button><button class="icon-btn danger" onclick="deleteData('${d.id}')">🗑️</button></div></div>`).join('');
     }
 
     // QUIZZES
@@ -580,7 +587,7 @@
       if(store.data.length===0){ checks.innerHTML='<p style="color:var(--text-secondary)">اول داده اضافه کن</p>'; }
       else {
         const selected=id?(store.quizzes.find(q=>q.id===id)?.itemIds||[]):[];
-        checks.innerHTML=store.data.map(d=>`<label class="check-item"><input type="checkbox" value="${d.id}" ${selected.includes(d.id)?'checked':''}><div class="info"><div dir="ltr"><strong>${escapeHtml(d.question)}</strong> = ${escapeHtml(d.answer)}</div></div></label>`).join('');
+        checks.innerHTML=store.data.map(d=>`<label class="check-item"><input type="checkbox" value="${d.id}" ${selected.includes(d.id)?'checked':''}><div class="info"><div dir="ltr"><strong>${renderMath(d.question)}</strong> = ${escapeHtml(d.answer)}</div></div></label>`).join('');
       }
       document.getElementById('input-quiz-name').value=id?(store.quizzes.find(q=>q.id===id).name):'';
       openModal('modal-create-quiz');
@@ -680,30 +687,86 @@
       document.getElementById('quiz-progress').textContent=`${quizState.index+1} / ${quizState.items.length}`;
       const item=quizState.items[quizState.index];
       const qEl=document.getElementById('question-display');
-      if(quizState.mode==='blind'){ qEl.textContent='؟؟؟'; qEl.style.opacity='0.4'; }
-      else if(quizState.mode==='flash'){ qEl.textContent=item.question; qEl.style.opacity='1'; if(quizState.flashTimeout) clearTimeout(quizState.flashTimeout); quizState.flashTimeout=setTimeout(()=>{ qEl.textContent='؟؟؟'; qEl.style.opacity='0.4'; },800); }
-      else { qEl.textContent=item.question; qEl.style.opacity='1'; }
+      if(quizState.mode==='blind'){ qEl.innerHTML='؟؟؟'; qEl.style.opacity='0.4'; }
+      else if(quizState.mode==='flash'){ qEl.innerHTML=renderMath(item.question); qEl.style.opacity='1'; if(quizState.flashTimeout) clearTimeout(quizState.flashTimeout); quizState.flashTimeout=setTimeout(()=>{ qEl.innerHTML='؟؟؟'; qEl.style.opacity='0.4'; },800); }
+      else { qEl.innerHTML=renderMath(item.question); qEl.style.opacity='1'; }
     }
+
+    // تبدیل متن ساده به نمایش زیبای کسر و رادیکال (شبیه Anki)
+    function renderMath(str){
+      if(!str) return '';
+      let s = escapeHtml(str);
+      // \frac{a}{b} یا \frac a b
+      s = s.replace(/\\frac\s*\{([^}]+)\}\s*\{([^}]+)\}/g, '<span class="frac"><span class="num">$1</span><span class="den">$2</span></span>');
+      s = s.replace(/\\frac\s+(\S+)\s+(\S+)/g, '<span class="frac"><span class="num">$1</span><span class="den">$2</span></span>');
+      // a/b به صورت کسر (فقط وقتی هر دو طرف ساده باشند)
+      s = s.replace(/(\d+)\/(\d+)/g, '<span class="frac"><span class="num">$1</span><span class="den">$2</span></span>');
+      // \sqrt{x} یا √x
+      s = s.replace(/\\sqrt\s*\{([^}]+)\}/g, '<span class="radical"><span class="radicand">$1</span></span>');
+      s = s.replace(/√\s*([^\s<]+)/g, '<span class="radical"><span class="radicand">$1</span></span>');
+      // توان ساده مثل 2^5 یا 2⁵
+      s = s.replace(/(\d+)\^(\d+)/g, '$1<sup>$2</sup>');
+      return s;
+    }
+
 
     function onKey(val){
       if(!quizState) return;
-      if(val==='back') quizState.currentAnswer=quizState.currentAnswer.slice(0,-1);
+      if(val==='back') {
+        quizState.currentAnswer=quizState.currentAnswer.slice(0,-1);
+        document.getElementById('answer-preview').textContent=quizState.currentAnswer;
+        document.getElementById('answer-preview').className='answer-preview';
+        document.getElementById('quiz-feedback').innerHTML='';
+        quizState.waitingCorrect=false;
+        return;
+      }
       else if(val==='enter'){ checkAnswer(); return; }
       else if(quizState.currentAnswer.length<20) quizState.currentAnswer+=val;
+
       document.getElementById('answer-preview').textContent=quizState.currentAnswer;
       document.getElementById('answer-preview').className='answer-preview';
-      // auto-check if no enter button and answer looks complete
-      if(!store.settings.showEnter && quizState.currentAnswer.length>0){
-        const item=quizState.items[quizState.index];
-        if(normalizeAns(quizState.currentAnswer)===normalizeAns(item.answer)) checkAnswer();
+
+      const item=quizState.items[quizState.index];
+      const userNorm=normalizeAns(quizState.currentAnswer);
+      const correctNorm=normalizeAns(item.answer);
+
+      // اگر تعداد کاراکترهای وارد شده بیشتر از جواب صحیح باشد → فوراً غلط
+      if(userNorm.length > correctNorm.length){
+        markWrong(userNorm);
+        return;
       }
+
+      // auto-check if no enter button and answer matches
+      if(!store.settings.showEnter && userNorm.length>0){
+        if(userNorm === correctNorm) checkAnswer();
+      }
+    }
+
+    function markWrong(userAns){
+      const item=quizState.items[quizState.index];
+      const already=quizState.wrongs.find(w=>w.question===item.question);
+      if(!already) quizState.wrongs.push({question:item.question,answer:item.answer,user:userAns});
+      else already.user=userAns;
+      document.getElementById('answer-preview').className='answer-preview wrong';
+      if(store.settings.vibrate&&navigator.vibrate) navigator.vibrate([40,30,40]);
+      quizState.waitingCorrect=true;
+      document.getElementById('quiz-feedback').innerHTML=`<button class="btn btn-warning btn-sm" onclick="skipQuestion()">رد کردن سؤال</button>`;
     }
 
     function checkAnswer(){
       if(!quizState||!quizState.currentAnswer) return;
       const item=quizState.items[quizState.index];
       const userAns=quizState.currentAnswer.trim();
-      const isCorrect=normalizeAns(userAns)===normalizeAns(item.answer);
+      const userNorm=normalizeAns(userAns);
+      const correctNorm=normalizeAns(item.answer);
+
+      // طول بیشتر از جواب → غلط
+      if(userNorm.length > correctNorm.length){
+        markWrong(userAns);
+        return;
+      }
+
+      const isCorrect=userNorm===correctNorm;
       if(isCorrect){
         quizState.correct++;
         quizState.waitingCorrect=false;
@@ -712,15 +775,10 @@
         document.getElementById('quiz-feedback').innerHTML='';
         setTimeout(()=>nextQuestion(),300);
       } else {
-        const already=quizState.wrongs.find(w=>w.question===item.question);
-        if(!already) quizState.wrongs.push({question:item.question,answer:item.answer,user:userAns});
-        else already.user=userAns;
-        document.getElementById('answer-preview').className='answer-preview wrong';
-        if(store.settings.vibrate&&navigator.vibrate) navigator.vibrate([40,30,40]);
-        quizState.waitingCorrect=true;
-        document.getElementById('quiz-feedback').innerHTML=`<button class="btn btn-warning btn-sm" onclick="skipQuestion()">رد کردن سؤال</button>`;
+        markWrong(userAns);
       }
     }
+
 
     function skipQuestion(){
       if(!quizState) return;
@@ -752,7 +810,7 @@
       if(allBad.length===0) wrongSection.classList.add('hidden');
       else {
         wrongSection.classList.remove('hidden');
-        document.getElementById('wrong-list').innerHTML=allBad.map(w=>`<div class="wrong-item"><div><div class="q" dir="ltr">${escapeHtml(w.question)} = ${escapeHtml(w.answer)}</div>${w.user?`<div style="font-size:0.85rem;color:var(--text-secondary)">جواب تو: ${escapeHtml(w.user)}</div>`:''}</div><span class="tag ${w.user===undefined?'skip':''}">${w.user===undefined?'رد شده':'غلط'}</span></div>`).join('');
+        document.getElementById('wrong-list').innerHTML=allBad.map(w=>`<div class="wrong-item"><div><div class="q" dir="ltr">${renderMath(w.question)} = ${escapeHtml(w.answer)}</div>${w.user?`<div style="font-size:0.85rem;color:var(--text-secondary)">جواب تو: ${escapeHtml(w.user)}</div>`:''}</div><span class="tag ${w.user===undefined?'skip':''}">${w.user===undefined?'رد شده':'غلط'}</span></div>`).join('');
       }
       showScreen('result');
       quizState=null;
@@ -826,10 +884,13 @@
       store.data=[
         {id:uid(),question:'√2',answer:'1.4',createdAt:Date.now()},
         {id:uid(),question:'√3',answer:'1.7',createdAt:Date.now()},
-        {id:uid(),question:'2⁵',answer:'32',createdAt:Date.now()},
+        {id:uid(),question:'2^5',answer:'32',createdAt:Date.now()},
         {id:uid(),question:'π',answer:'3.14',createdAt:Date.now()},
-        {id:uid(),question:'5!',answer:'120',createdAt:Date.now()}
+        {id:uid(),question:'5!',answer:'120',createdAt:Date.now()},
+        {id:uid(),question:'\\frac{1}{2}',answer:'0.5',createdAt:Date.now()},
+        {id:uid(),question:'3/4',answer:'0.75',createdAt:Date.now()}
       ];
+
       ensureDefaultQuiz();
       saveStore();
     }
